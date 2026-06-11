@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE.md / AGENTS.md Generator</title>
+<style>
+:root {
+  --bg: #f4ecd8;
+  --paper: #fbf6e8;
+  --paper-2: #f0e6cc;
+  --ink: #2a1f10;
+  --ink-soft: #6a563a;
+  --rule: #b8a274;
+  --sepia: #5a3a1a;
+  --sepia-deep: #3a2208;
+  --accent: #8a5a1a;
+  --code-bg: #ebe1c4;
+  --ok: #2a5c1a;
+  --warn: #8a4a00;
+  --err: #8b1a10;
+}
+[data-theme="dark"] {
+  --bg: #1a1408;
+  --paper: #251c10;
+  --paper-2: #2c2410;
+  --ink: #ede0c4;
+  --ink-soft: #b8a878;
+  --rule: #4a3818;
+  --sepia: #d4b478;
+  --sepia-deep: #f0d090;
+  --accent: #f0b860;
+  --code-bg: #0c0805;
+  --ok: #6dd380;
+  --warn: #d4a155;
+  --err: #e88080;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: ui-serif, "Iowan Old Style", Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  line-height: 1.65;
+}
+.wrap { max-width: 1100px; margin: 0 auto; }
+header {
+  border-bottom: 1px solid var(--sepia);
+  padding-bottom: 1rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+h1 {
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--sepia);
+  font-variant: small-caps;
+}
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+  font-family: ui-sans-serif, sans-serif;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.theme-btn:hover { border-color: var(--sepia); color: var(--sepia); }
+.lede {
+  font-size: 1rem;
+  margin-bottom: 1.75rem;
+  max-width: 70ch;
+  color: var(--ink);
+}
+.lede-marg {
+  font-size: 2.4rem;
+  font-weight: 600;
+  float: left;
+  line-height: 0.9;
+  margin: 0.2rem 0.45rem 0 0;
+  color: var(--sepia);
+  font-family: ui-serif, Georgia, serif;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.5rem;
+}
+.panel h2 {
+  font-family: ui-sans-serif, -apple-system, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sepia);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.field { margin-bottom: 1.1rem; }
+label {
+  display: block;
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sepia);
+  margin-bottom: 0.4rem;
+}
+.help {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  margin-bottom: 0.4rem;
+  font-family: ui-serif, Georgia, serif;
+}
+input[type="text"], textarea {
+  width: 100%;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.55rem 0.75rem;
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border-radius: 2px;
+}
+textarea { resize: vertical; min-height: 64px; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.85rem; }
+input:focus, textarea:focus { outline: 2px solid var(--sepia); outline-offset: 1px; }
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 1rem;
+}
+.tab {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  border-radius: 0;
+}
+.tab.active {
+  color: var(--sepia);
+  border-bottom-color: var(--sepia);
+  font-weight: 700;
+}
+.btn-row {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+button {
+  font-family: ui-sans-serif, sans-serif;
+  font-size: 0.82rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+button.primary {
+  background: var(--sepia);
+  border-color: var(--sepia-deep);
+  color: var(--paper);
+  font-weight: 600;
+}
+[data-theme="dark"] button.primary {
+  color: var(--bg) !important;
+}
+button.primary:hover { background: var(--sepia-deep); }
+button:hover { border-color: var(--sepia); }
+.output-pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 2px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.output-empty {
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 2rem;
+  text-align: center;
+}
+footer {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  font-family: ui-sans-serif, sans-serif;
+}
+footer a { color: var(--sepia); text-decoration: underline; }
+@media (max-width: 800px) {
+  body { padding: 1rem 0.75rem; }
+  h1 { font-size: 1.3rem; }
+  .layout { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>CLAUDE.md / AGENTS.md Generator</h1>
+    <div class="subtitle">A reference manual builder for your project's agent context file</div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" type="button">Dark</button>
+</header>
+
+<p class="lede"><span class="lede-marg">A</span> structured generator for the per-project markdown file that every coding agent should read first. Fill in what's relevant; skip what isn't. The output follows established conventions with sections in the right order, headings the agent will recognize, and no filler.</p>
+
+<div class="layout">
+  <div class="panel">
+    <h2>Project details</h2>
+
+    <div class="field">
+      <label for="proj-name">Project name</label>
+      <input type="text" id="proj-name" placeholder="my-app">
+    </div>
+
+    <div class="field">
+      <label for="proj-desc">One-paragraph description</label>
+      <div class="help">What does this project do? Who uses it? Stay concrete.</div>
+      <textarea id="proj-desc" rows="3" placeholder="A REST API that serves user profile data to the mobile app. Used internally only. About 50 endpoints. Postgres backend, Redis cache."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="proj-stack">Stack and versions</label>
+      <div class="help">Languages, frameworks, runtimes, with major versions. Pin them.</div>
+      <textarea id="proj-stack" rows="3" placeholder="TypeScript 5.4, Node 22, Express 4, Postgres 16, Redis 7, Jest 29"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="cmd-build">Build command</label>
+      <input type="text" id="cmd-build" placeholder="npm run build">
+    </div>
+
+    <div class="field">
+      <label for="cmd-test">Test command</label>
+      <input type="text" id="cmd-test" placeholder="npm test">
+    </div>
+
+    <div class="field">
+      <label for="cmd-run">Run / dev command</label>
+      <input type="text" id="cmd-run" placeholder="npm run dev">
+    </div>
+
+    <div class="field">
+      <label for="cmd-lint">Lint / typecheck command</label>
+      <input type="text" id="cmd-lint" placeholder="npm run lint">
+    </div>
+
+    <div class="field">
+      <label for="structure">Codebase structure</label>
+      <div class="help">Where things live. Skip if it matches the framework default.</div>
+      <textarea id="structure" rows="5" placeholder="src/routes/    HTTP route handlers
+src/services/  business logic
+src/db/        database access (no business logic here)
+src/lib/       pure utilities
+tests/         tests, mirrored to src structure"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="conventions">Conventions</label>
+      <div class="help">Naming, patterns, style choices that aren't obvious. One per line.</div>
+      <textarea id="conventions" rows="5" placeholder="- Function names: camelCase
+- File names: kebab-case
+- Errors propagate; don't catch unless you can recover
+- Database queries via repository pattern, not directly in routes
+- No new dependencies without asking"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="gotchas">Gotchas / past failures</label>
+      <div class="help">Things that broke before. Specific past mistakes to avoid.</div>
+      <textarea id="gotchas" rows="5" placeholder="- Don't use Date.now() for IDs (clock skew across replicas); use ulid
+- The /webhooks/stripe endpoint returns 200 even on processing errors; that's intentional, don't 'fix'
+- Tests must run with TZ=UTC; setting it elsewhere produces flaky results"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="constraints">Hard constraints</label>
+      <div class="help">Things that must NOT change without explicit approval.</div>
+      <textarea id="constraints" rows="4" placeholder="- Public API shapes (routes, request/response schemas) must stay stable
+- Database schema changes require a migration file
+- No console.log in production code
+- No new top-level dependencies without approval"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="decisions">Recent decisions / migrations</label>
+      <div class="help">Active migrations or recent direction changes the agent should know.</div>
+      <textarea id="decisions" rows="3" placeholder="Migrating from Mongo to Postgres. New writes go to Postgres. Reads still from Mongo until backfill completes (Q2)."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="generate-btn" type="button">Generate</button>
+      <button id="sample-btn" type="button">Load sample</button>
+      <button id="clear-btn" type="button">Clear</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Output</h2>
+    <div class="tabs">
+      <button class="tab active" data-format="claude" type="button">CLAUDE.md</button>
+      <button class="tab" data-format="agents" type="button">AGENTS.md</button>
+    </div>
+    <div id="output-container">
+      <div class="output-empty" id="output-empty">Fill the form and click Generate to see output.</div>
+      <pre class="output-pre" id="output" style="display: none;"></pre>
+    </div>
+    <div class="btn-row" id="output-actions" style="display: none;">
+      <button class="primary" id="copy-btn" type="button">Copy</button>
+      <button id="download-btn" type="button">Download</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>CLAUDE.md / AGENTS.md Generator. MIT licensed. <a href="https://github.com/0xelitesystem/claude-md-generator" target="_blank" rel="noopener">View source</a>.</div>
+  <div>Browser-based. No data leaves your device.</div>
+</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const themeBtn = $("theme-toggle");
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+}
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "light";
+  setTheme(cur === "dark" ? "light" : "dark");
+});
+
+let currentFormat = "claude";
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    currentFormat = t.dataset.format;
+    if ($("output").style.display !== "none") generate();
+  });
+});
+
+function getValues() {
+  return {
+    name: $("proj-name").value.trim(),
+    desc: $("proj-desc").value.trim(),
+    stack: $("proj-stack").value.trim(),
+    build: $("cmd-build").value.trim(),
+    test: $("cmd-test").value.trim(),
+    run: $("cmd-run").value.trim(),
+    lint: $("cmd-lint").value.trim(),
+    structure: $("structure").value.trim(),
+    conventions: $("conventions").value.trim(),
+    gotchas: $("gotchas").value.trim(),
+    constraints: $("constraints").value.trim(),
+    decisions: $("decisions").value.trim(),
+  };
+}
+
+function emit(format, v) {
+  const lines = [];
+  const isClaude = format === "claude";
+  const headerName = isClaude ? "CLAUDE.md" : "AGENTS.md";
+
+  lines.push(`# ${v.name || "Project"}`);
+  lines.push("");
+  if (v.desc) {
+    lines.push(v.desc);
+    lines.push("");
+  }
+  lines.push(`This file is the project's context for AI coding agents. ${isClaude ? "Claude Code reads it" : "Coding agents read it"} on session start. Keep it accurate; outdated entries here cause repeated mistakes.`);
+  lines.push("");
+
+  if (v.stack) {
+    lines.push("## Stack");
+    lines.push("");
+    v.stack.split("\n").forEach(l => l.trim() && lines.push(l.trim().startsWith("-") ? l : "- " + l.trim()));
+    lines.push("");
+  }
+
+  const cmds = [
+    ["Build", v.build],
+    ["Test", v.test],
+    ["Run / dev", v.run],
+    ["Lint / typecheck", v.lint],
+  ].filter(([, c]) => c);
+  if (cmds.length > 0) {
+    lines.push("## Commands");
+    lines.push("");
+    cmds.forEach(([name, cmd]) => {
+      lines.push(`- ${name}: \`${cmd}\``);
+    });
+    lines.push("");
+  }
+
+  if (v.structure) {
+    lines.push("## Codebase structure");
+    lines.push("");
+    lines.push("```");
+    lines.push(v.structure);
+    lines.push("```");
+    lines.push("");
+  }
+
+  if (v.conventions) {
+    lines.push("## Conventions");
+    lines.push("");
+    v.conventions.split("\n").forEach(l => {
+      const t = l.trim();
+      if (t) lines.push(t.startsWith("-") ? t : "- " + t);
+    });
+    lines.push("");
+  }
+
+  if (v.constraints) {
+    lines.push("## Hard constraints");
+    lines.push("");
+    lines.push("These should not change without explicit human approval:");
+    lines.push("");
+    v.constraints.split("\n").forEach(l => {
+      const t = l.trim();
+      if (t) lines.push(t.startsWith("-") ? t : "- " + t);
+    });
+    lines.push("");
+  }
+
+  if (v.gotchas) {
+    lines.push("## Gotchas");
+    lines.push("");
+    lines.push("Specific things that have caused problems before:");
+    lines.push("");
+    v.gotchas.split("\n").forEach(l => {
+      const t = l.trim();
+      if (t) lines.push(t.startsWith("-") ? t : "- " + t);
+    });
+    lines.push("");
+  }
+
+  if (v.decisions) {
+    lines.push("## Active migrations / recent direction");
+    lines.push("");
+    lines.push(v.decisions);
+    lines.push("");
+  }
+
+  lines.push("## Workflow");
+  lines.push("");
+  lines.push("- Default to minimum diff. Don't refactor adjacent code while doing a task.");
+  lines.push("- Before non-trivial changes: scope first, code second. List files that will change before writing.");
+  lines.push("- Run tests and lint after changes. Don't claim work is done without verification.");
+  lines.push("- If a task seems to require breaking a hard constraint, stop and ask.");
+  lines.push("");
+
+  return lines.join("\n");
+}
+
+function generate() {
+  const v = getValues();
+  if (!v.name && !v.desc && !v.stack) {
+    $("output-empty").style.display = "block";
+    $("output").style.display = "none";
+    $("output-actions").style.display = "none";
+    return;
+  }
+  const text = emit(currentFormat, v);
+  $("output-empty").style.display = "none";
+  $("output").style.display = "block";
+  $("output").textContent = text;
+  $("output-actions").style.display = "flex";
+}
+
+$("generate-btn").addEventListener("click", generate);
+
+$("clear-btn").addEventListener("click", () => {
+  document.querySelectorAll("input[type=text], textarea").forEach(el => el.value = "");
+  $("output-empty").style.display = "block";
+  $("output").style.display = "none";
+  $("output-actions").style.display = "none";
+});
+
+$("sample-btn").addEventListener("click", () => {
+  $("proj-name").value = "user-api";
+  $("proj-desc").value = "REST API for user profile data. Internal-only, called by mobile app and admin dashboard. ~50 endpoints, mostly CRUD with a few aggregations.";
+  $("proj-stack").value = "TypeScript 5.4\nNode 22\nExpress 4\nPostgres 16\nRedis 7\nJest 29";
+  $("cmd-build").value = "npm run build";
+  $("cmd-test").value = "npm test";
+  $("cmd-run").value = "npm run dev";
+  $("cmd-lint").value = "npm run lint && npm run typecheck";
+  $("structure").value = `src/routes/      HTTP route handlers (thin)
+src/services/    business logic
+src/repositories/ database access
+src/lib/         pure utilities
+tests/           Jest tests mirroring src/`;
+  $("conventions").value = `- Function names: camelCase, file names: kebab-case
+- Routes are thin; logic in services
+- Errors propagate to error middleware; don't catch unless you can recover
+- Database access only through repository functions
+- Use zod for request validation`;
+  $("gotchas").value = `- Tests must run with TZ=UTC (set in package.json scripts)
+- The /webhooks/stripe endpoint returns 200 on processing errors intentionally; do not change
+- Don't use Date.now() for IDs - use ulid (already imported)
+- Redis cache invalidation is manual; if you change a cached field, invalidate the cache`;
+  $("constraints").value = `- Public API contract (routes + request/response shapes) must not change without versioning
+- Schema changes require a migration in db/migrations/
+- No console.log in production code
+- No new top-level dependencies without asking`;
+  $("decisions").value = "Migrating auth from custom JWT to managed Cognito. New endpoints use Cognito tokens. Old endpoints still accept legacy JWT until 2026-08.";
+  generate();
+});
+
+$("copy-btn").addEventListener("click", async () => {
+  const text = $("output").textContent;
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    const orig = $("copy-btn").textContent;
+    $("copy-btn").textContent = "Copied";
+    setTimeout(() => { $("copy-btn").textContent = orig; }, 1500);
+  } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e2) {}
+    document.body.removeChild(ta);
+  }
+});
+
+$("download-btn").addEventListener("click", () => {
+  const text = $("output").textContent;
+  if (!text) return;
+  const filename = currentFormat === "claude" ? "CLAUDE.md" : "AGENTS.md";
+  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+setTheme("light");
+</script>
+</body>
+</html>
