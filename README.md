@@ -79,6 +79,8 @@ Part of a catalog of single-file browser tools and plain-language references, al
 
 MIT.
 
+Independent project. Not affiliated with, endorsed by, or sponsored by Anthropic. Claude is a trademark of Anthropic PBC.
+
 ## Related
 
 - [cursor-rules-collection](https://github.com/0xelitesystem/cursor-rules-collection) - examples by stack
