@@ -10,11 +10,13 @@ Open [`index.html`](./index.html). Fill in what's relevant: project name, descri
 
 Switch between CLAUDE.md and AGENTS.md output formats. Copy or download.
 
-## Why
+## Why this exists
 
 Most teams hand-roll their CLAUDE.md / AGENTS.md as a stream of consciousness. The result misses the sections agents actually use (build commands, structure, gotchas) and over-includes things they don't (aspirational descriptions, generic style advice).
 
 This tool enforces structure: sections in the right order, headings agents recognize, no filler, no bullet-shaped restatements of the obvious.
+
+It is one HTML file that runs in your browser with no tracking, released under the MIT license.
 
 ## What goes in
 
@@ -43,6 +45,8 @@ These reduce signal in agent context.
 ## Privacy
 
 Everything runs in your browser. No upload, no analytics, no third-party scripts.
+
+The page makes no network requests. What you type is not saved; Copy writes to your clipboard and Download saves a file on your machine. The only thing stored is your light or dark theme choice, under the `theme` key in localStorage, after you click the theme button.
 
 ## Run locally
 
